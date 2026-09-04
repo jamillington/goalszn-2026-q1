@@ -328,10 +328,7 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border
     <table class="grid" id="grid"></table>
   </div>
 
-  <div class="section-header">📝 Captain's adjustments</div>
-  <div class="flags-section" id="adjustments" style="background:#eff6ff;border-color:#bfdbfe;"></div>
-
-  <div class="section-header">⚠️ Flagged for timezone review (workouts posted 12am–5am local — may have been logged on the wrong calendar day)</div>
+  <div class="section-header">⚠️ Flagged for review</div>
   <div class="flags-section" id="flags"></div>
   </div><!-- end season-content -->
 
@@ -499,7 +496,9 @@ function renderGrid() {
       else if (w.actual > 0 && w.missed > 0) cls += 'cell-partial';
       if (w.missed === p.goal && w.actual === 0) cls = 'cell cell-miss';
       if (w.flags > 0) cls += ' cell-tz';
-      html += `<td class="${cls}" title="${w.actual}/${p.goal} · missed ${w.missed}${w.flags?' · ⚠ '+w.flags+' flag':''}">${w.actual}</td>`;
+      const hasSickDay = (w.sick_days > 0) || (typeof w.completed === 'number' && w.actual > w.completed);
+      const sickIcon = hasSickDay ? '<span style="font-size:9px;margin-left:2px;opacity:0.75">🤒</span>' : '';
+      html += `<td class="${cls}" title="${w.actual}/${p.goal} · missed ${w.missed}${w.flags?' · ⚠ '+w.flags+' flag':''}${hasSickDay?' · sick day':''}">${w.actual}${sickIcon}</td>`;
     });
     html += `<td class="totals ${p.total_misses === 0 ? 'zero':''}">${p.total_misses}</td>`;
     html += `<td class="totals ${p.total_owed === 0 ? 'zero':''}">$${p.total_owed}</td>`;
@@ -511,55 +510,104 @@ function renderGrid() {
 
 function renderFlags() {
   const root = document.getElementById('flags');
-  const noteItems = (DATA.notes || []).map(n =>
-    `<div class="flag-row"><div class="who" style="color:#b45309">📋 Note</div><div class="when"></div><div class="why">${n}</div></div>`
-  );
+
+  // Build per-person adjustment lookup
+  const adjByPerson = {};
+  DATA.people.forEach(p => (p.adjustments || []).forEach(a => {
+    if (!adjByPerson[p.name]) adjByPerson[p.name] = [];
+    adjByPerson[p.name].push(a);
+  }));
+
+  // Collect flagged events (skip sick days)
   const allFlags = [];
   DATA.people.forEach(p => p.flagged_events.forEach(f => {
     if (typeof f === 'string') {
-      if (f.startsWith('🤒')) return; // skip sick days
+      if (f.startsWith('🤒')) return;
       allFlags.push({ _str: f, person: p.name });
     } else {
       allFlags.push({...f, person: p.name});
     }
   }));
-  if (allFlags.length === 0 && noteItems.length === 0) {
-    root.innerHTML = '<div style="color:#666;font-size:14px">None! No suspiciously-timed posts this season.</div>';
-    return;
-  }
-  const flagRows = allFlags.map(f => {
-    if (f._str) {
-      return `<div class="flag-row"><div class="who">${f.person}</div><div class="when"></div><div class="why">${f._str}</div></div>`;
-    }
-    return `<div class="flag-row"><div class="who">${f.person}</div><div class="when">${fmtDateTime(f.ts)}</div><div class="why">${f.reason}<br><span style="color:#888">${(f.text||'').replace(/[<>]/g,'').slice(0,140)}</span></div></div>`;
-  });
-  root.innerHTML = [...noteItems, ...flagRows].join('');
-}
 
-function renderAdjustments() {
-  const root = document.getElementById('adjustments');
-  const adj = [];
-  DATA.people.forEach(p => (p.adjustments || []).forEach(a => adj.push({...a, person: p.name})));
-  if (adj.length === 0 && (!DATA.adjustments || DATA.adjustments.length === 0)) {
-    root.innerHTML = '<div style="color:#666;font-size:14px">No manual adjustments applied.</div>';
+  // Collect global notes
+  const globalNotes = (DATA.notes || []);
+
+  // Collect standalone adjustments (people with adjustments but no flag)
+  const peopleWithFlags = new Set(allFlags.map(f => f.person));
+  const standaloneAdj = [];
+  DATA.people.forEach(p => {
+    if (!peopleWithFlags.has(p.name) && adjByPerson[p.name]) {
+      adjByPerson[p.name].forEach(a => standaloneAdj.push({ person: p.name, adj: a }));
+    }
+  });
+
+  const hasContent = allFlags.length > 0 || standaloneAdj.length > 0 || globalNotes.length > 0;
+  if (!hasContent) {
+    root.innerHTML = '<div style="color:#666;font-size:14px">None this season.</div>';
     return;
   }
-  let html = '';
-  if (DATA.adjustments && DATA.adjustments.length) {
-    html += DATA.adjustments.map(s => `<div style="font-size:13px;color:#1e3a8a;padding:4px 0">• ${s}</div>`).join('');
-  }
-  if (adj.length) {
-    html += '<div style="border-top:1px solid #bfdbfe;margin-top:8px;padding-top:8px"></div>';
-    html += adj.map(a => `
-      <div class="flag-row" style="border-bottom-color:#dbeafe">
-        <div class="who">${a.person}</div>
-        <div class="when">${fmtDateTime(a.ts)}</div>
-        <div class="why">${a.note}<br><span style="color:#1e3a8a">Posted ${fmtDate(a.orig_date)} → counted on ${fmtDate(a.effective_date)}</span></div>
-      </div>
-    `).join('');
-  }
+
+  const thStyle = 'text-align:left;padding:8px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-faint);border-bottom:2px solid var(--border)';
+  const tdStyle = 'padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--border);font-size:13px';
+
+  let html = `<table style="width:100%;border-collapse:collapse;background:var(--surface);border-radius:10px;overflow:hidden">
+    <thead><tr>
+      <th style="${thStyle};width:130px">Name</th>
+      <th style="${thStyle}">WhatsApp message</th>
+      <th style="${thStyle};width:280px">Captain's adjustment</th>
+    </tr></thead><tbody>`;
+
+  // Flagged events with matched adjustments
+  allFlags.forEach(f => {
+    const adjs = adjByPerson[f.person] || [];
+    let msgHtml;
+    let strAdjHtml = null;
+    if (f._str) {
+      const arrowIdx = f._str.indexOf(' → ');
+      if (arrowIdx !== -1) {
+        msgHtml = `<span style="color:var(--text)">${f._str.slice(0, arrowIdx)}</span>`;
+        strAdjHtml = f._str.slice(arrowIdx + 3);
+      } else {
+        msgHtml = `<span style="color:var(--text)">${f._str}</span>`;
+      }
+    } else {
+      const raw = (f.text || '').replace(/[<>]/g, '');
+      const parenEnd = raw.indexOf(')');
+      const txt = parenEnd !== -1 ? raw.slice(0, parenEnd + 1) : raw.slice(0, 160);
+      msgHtml = `<span style="color:var(--text-muted);font-size:12px">${fmtDateTime(f.ts)}</span><br>${txt}`;
+    }
+    const adjHtml = strAdjHtml !== null
+      ? strAdjHtml
+      : adjs.length > 0
+        ? adjs.map(a => {
+            const parts = [a.note];
+            if (a.orig_date && a.effective_date) parts.push(`<span style="color:var(--text-faint);font-size:11px">${fmtDate(a.orig_date)} → ${fmtDate(a.effective_date)}</span>`);
+            return parts.join('<br>');
+          }).join('<br>')
+        : '<span style="color:var(--text-faint)">—</span>';
+    html += `<tr>
+      <td style="${tdStyle};font-weight:700">${f.person}</td>
+      <td style="${tdStyle}">${msgHtml}</td>
+      <td style="${tdStyle};color:#1e3a8a">${adjHtml}</td>
+    </tr>`;
+  });
+
+  // Standalone adjustments (no matching flag)
+  standaloneAdj.forEach(({ person, adj }) => {
+    const parts = [adj.note];
+    if (adj.orig_date && adj.effective_date) parts.push(`<span style="color:var(--text-faint);font-size:11px">${fmtDate(adj.orig_date)} → ${fmtDate(adj.effective_date)}</span>`);
+    html += `<tr>
+      <td style="${tdStyle};font-weight:700">${person}</td>
+      <td style="${tdStyle}"><span style="color:var(--text-faint)">—</span></td>
+      <td style="${tdStyle};color:#1e3a8a">${parts.join('<br>')}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
   root.innerHTML = html;
 }
+
+function renderAdjustments() { /* merged into renderFlags */ }
 
 function fireConfetti() {
   const canvas = document.createElement('canvas');
@@ -597,35 +645,42 @@ function renderAwards() {
   const people = DATA.people;
   const awards = [];
 
-  // ✨ Flawless — 0 misses
-  const flawless = people.filter(p => p.total_misses === 0).map(p => p.name);
+  // 🐝 Flawless — 0 misses AND 0 sick days
+  const flawless = people.filter(p => {
+    const sickDaysFromFlags = (p.flagged_events || []).filter(f => typeof f === 'string' && f.startsWith('🤒')).length;
+    const sickDaysFromWeeks = p.weeks.some(w => (w.sick_days > 0) || (typeof w.completed === 'number' && w.actual > w.completed));
+    return p.total_misses === 0 && sickDaysFromFlags === 0 && !sickDaysFromWeeks;
+  }).map(p => p.name);
   if (flawless.length > 0) {
-    awards.push({ emoji: '✨', title: 'Flawless', winner: flawless.join(' · '), detail: '0 misses all season' });
+    awards.push({ emojiHtml: '<span style="position:relative;display:inline-block;line-height:1">🐝<span style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:13px;line-height:1">👑</span></span>', emoji: '🐝', title: 'Flawless', winner: flawless.join(' · '), detail: 'no misses, no sick days' });
+  }
+
+  // Overachiever — most bonus workouts above weekly goal
+  const overData = people.map(p => {
+    const bonus = p.weeks.reduce((sum, w) => sum + Math.max(0, w.actual - p.goal), 0);
+    return { name: p.name, bonus };
+  }).filter(x => x.bonus > 0);
+  if (overData.length > 0) {
+    overData.sort((a,b) => b.bonus - a.bonus);
+    const top = overData[0];
+    awards.push({ emoji: '💪', title: 'Overachiever', winner: top.name, detail: `${top.bonus} bonus workout${top.bonus === 1 ? '' : 's'} above goal` });
   }
 
   // Timing + variety awards — only if any person has all_events
   const hasEvents = people.some(p => p.all_events && p.all_events.length > 0);
   if (hasEvents) {
-    const earlyData = people.map(p => {
+    // Weekend Warrior — most workouts on Sat or Sun
+    const weekendData = people.map(p => {
       if (!p.all_events || p.all_events.length === 0) return null;
-      const early = p.all_events.filter(e => { const h = new Date(e.ts).getHours(); return h < 9; });
-      return { name: p.name, count: early.length };
+      const count = p.all_events.filter(e => { const d = new Date(e.ts).getDay(); return d === 0 || d === 6; }).length;
+      return { name: p.name, count };
     }).filter(Boolean).filter(x => x.count > 0);
-
-    const nightData = people.map(p => {
-      if (!p.all_events || p.all_events.length === 0) return null;
-      const late = p.all_events.filter(e => { const h = new Date(e.ts).getHours(); return h >= 22; });
-      return { name: p.name, count: late.length };
-    }).filter(Boolean).filter(x => x.count > 0);
-
-    if (earlyData.length > 0) {
-      earlyData.sort((a,b) => b.count - a.count);
-      awards.push({ emoji: '🌅', title: 'Early Bird', winner: earlyData[0].name, detail: `${earlyData[0].count} workouts before 9am` });
+    if (weekendData.length > 0) {
+      weekendData.sort((a,b) => b.count - a.count);
+      const top = weekendData[0];
+      awards.push({ emoji: '🏄', title: 'Weekend Warrior', winner: top.name, detail: `${top.count} weekend workout${top.count === 1 ? '' : 's'}` });
     }
-    if (nightData.length > 0) {
-      nightData.sort((a,b) => b.count - a.count);
-      awards.push({ emoji: '🌙', title: 'Night Owl', winner: nightData[0].name, detail: `${nightData[0].count} workouts after 10pm` });
-    }
+
 
     // 🤸 Renaissance Athlete — most distinct workout types
     const TYPES = [
@@ -660,7 +715,7 @@ function renderAwards() {
 
     if (varieties.length > 0) {
       const top = varieties.reduce((best, x) => x.count > best.count ? x : best, varieties[0]);
-      awards.push({ emoji: '🤸', title: 'Renaissance Athlete', winner: top.name, detail: top.types.join(', ') });
+      awards.push({ emoji: '🤸', title: 'Renaissance Athlete', winner: top.name, detail: 'most varied workouts: ' + top.types.join(', ') });
     }
   }
 
@@ -673,7 +728,7 @@ function renderAwards() {
   awardsHeader.style.display = '';
   awardsEl.innerHTML = awards.map(a => `
     <div class="award-card">
-      <span class="award-emoji">${a.emoji}</span>
+      <span class="award-emoji">${a.emojiHtml || a.emoji}</span>
       <div class="award-title">${a.title}</div>
       <div class="award-winner">${a.winner}</div>
       <div class="award-detail">${a.detail}</div>
