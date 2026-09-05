@@ -674,11 +674,17 @@ function renderAlltimeView() {
     <div style="text-align:center">Workouts</div>
     <div style="text-align:right">Pot</div>
   </div>`;
+  const totalWorkoutsAll = ALLTIME_SEASONS.reduce((sum, s) => {
+    if (s.key && SEASONS[s.key]) {
+      return sum + SEASONS[s.key].people.reduce((a, p) => a + p.weeks.reduce((b, w) => b + w.actual, 0), 0);
+    }
+    return sum + (s.workouts || 0);
+  }, 0);
   const totalRow = `<div style="display:grid;grid-template-columns:1fr 80px 90px 80px;gap:8px;padding:12px 16px;background:var(--dark);font-size:14px;align-items:center">
     <div style="font-weight:800;color:var(--lime)">All-Time Total</div>
-    <div style="text-align:center;color:var(--lime);opacity:0.7">7</div>
-    <div style="text-align:center;color:var(--lime);opacity:0.7">—</div>
-    <div style="text-align:right;font-weight:800;color:var(--lime);font-variant-numeric:tabular-nums">$1,783</div>
+    <div style="text-align:center;color:var(--lime);opacity:0.7">${ALLTIME_SEASONS.length}</div>
+    <div style="text-align:center;color:var(--lime);opacity:0.7;font-variant-numeric:tabular-nums">${totalWorkoutsAll.toLocaleString()}</div>
+    <div style="text-align:right;font-weight:800;color:var(--lime);font-variant-numeric:tabular-nums">$${allPot.toLocaleString()}</div>
   </div>`;
   el.innerHTML = header + rows.join('') + totalRow;
 }
