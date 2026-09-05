@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GoalSZN — Lactic Acid Trip Gym</title>
+<title>GoalSZN Gym</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap');
 
@@ -280,19 +280,20 @@ table.grid td.totals.zero { background: var(--lime-light); color: var(--dark); }
   padding: 14px 16px;
 }
 .atp-name {
-  font-size: 14px; font-weight: 800; color: var(--dark); margin-bottom: 6px;
+  font-size: 14px; font-weight: 800; color: var(--dark); margin-bottom: 10px;
 }
+.atp-divider { border: none; border-top: 1px solid var(--border); margin: 0 0 10px; }
 .atp-bees {
-  min-height: 22px; display: flex; flex-wrap: wrap; gap: 4px;
-  align-items: center; margin-bottom: 10px;
+  display: flex; flex-wrap: wrap; gap: 3px;
+  align-items: center; padding-top: 10px; border-top: 1px solid var(--border); margin-top: 10px;
 }
 .atp-stats-row {
-  display: flex; gap: 0; border-top: 1px solid var(--border); padding-top: 10px;
+  display: flex; gap: 0;
 }
-.atp-stat-cell { flex: 1; text-align: center; }
-.atp-sv { font-size: 20px; font-weight: 800; color: var(--dark); font-variant-numeric: tabular-nums; }
+.atp-stat-cell { flex: 1; text-align: left; padding-right: 8px; }
+.atp-sv { font-size: 18px; font-weight: 800; color: var(--dark); font-variant-numeric: tabular-nums; line-height: 1.1; }
 .atp-sv.atp-zero { color: #16a34a; }
-.atp-sl { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; }
+.atp-sl { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 .atp-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
 .atp-badge {
   font-size: 11px; padding: 2px 8px; border-radius: 999px;
@@ -439,11 +440,10 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border
     <div style="text-align:center;padding:36px 0 28px"><div id="alltime-hero-total" style="font-size:56px;font-weight:800;color:var(--dark);letter-spacing:-2px;line-height:1">$0</div><div id="alltime-hero-sub" style="color:var(--text-muted);font-size:14px;margin-top:8px;letter-spacing:0.2px"></div></div>
     <div id="alltime-table" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;max-width:640px;margin:0 auto 40px"></div>
     <div style="display:flex;align-items:baseline;gap:16px;margin:32px 0 10px;flex-wrap:wrap">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-faint)">Career Records</div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="font-size:16px;font-weight:800;letter-spacing:-0.3px;color:var(--dark)">Career Records</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
         <span style="font-size:11px;color:var(--text-faint)"><span style="position:relative;display:inline-block;line-height:1.2;font-size:13px;vertical-align:middle">🐝<span style="position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:9px;line-height:1">👑</span></span> &nbsp;flawless season</span>
-        <span style="font-size:11px;color:var(--text-faint)">💪 overachiever</span>
-        <span style="font-size:11px;color:var(--text-faint)">🤸 renaissance athlete</span>
+        <span style="font-size:11px;color:var(--text-faint)">Hit Rate = % of weeks you met or beat your goal</span>
       </div>
     </div>
     <div class="alltime-people" id="alltime-people"></div>
@@ -482,7 +482,7 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border
   </div><!-- end season-content -->
 
   <footer>
-    <button class="footer-toggle" id="footer-toggle" onclick="toggleFooter()">About GoalSZN + this site ▾</button>
+    <button class="footer-toggle" id="footer-toggle">About GoalSZN + this site ▾</button>
     <div class="footer-body" id="footer-body" style="display:none">
       Built from the group's WhatsApp chat export + sign-up surveys. Penalty per miss follows the rules table:
       1/wk=$30 · 2/wk=$15 · 3/wk=$10 · 4/wk=$8 · 5/wk=$6 · 6/wk=$4 · 7/wk=$2.
@@ -597,12 +597,14 @@ function renderAlltimePeople() {
     seasonPeople.forEach(p => {
       const canonical = NAME_NORM[p.name] || p.name;
       if (!personMap[canonical]) {
-        personMap[canonical] = { name: canonical, seasons: 0, totalWorkouts: 0, totalMisses: 0, flawlessSeasons: 0, overachieverSeasons: 0, renaissanceSeasons: 0 };
+        personMap[canonical] = { name: canonical, seasons: 0, totalWorkouts: 0, totalMisses: 0, flawlessSeasons: 0, overachieverSeasons: 0, renaissanceSeasons: 0, totalWeeksHit: 0, totalWeeks: 0 };
       }
       const e = personMap[canonical];
       e.seasons++;
       e.totalWorkouts += p.weeks.reduce((s, w) => s + w.actual, 0);
       e.totalMisses += p.total_misses;
+      e.totalWeeksHit += p.weeks.filter(w => w.actual >= p.goal).length;
+      e.totalWeeks += p.weeks.length;
       if (p.total_misses === 0) e.flawlessSeasons++;
       if (overachievers.has(canonical)) e.overachieverSeasons++;
       if (renaissanceWinner === canonical) e.renaissanceSeasons++;
@@ -619,20 +621,17 @@ function renderAlltimePeople() {
     const bees = p.flawlessSeasons > 0
       ? Array(p.flawlessSeasons).fill(queenBee).join('')
       : '';
-    const badges = [
-      p.overachieverSeasons > 0 ? `<span class="atp-badge">💪 ×${p.overachieverSeasons}</span>` : '',
-      p.renaissanceSeasons > 0 ? `<span class="atp-badge">🤸 ×${p.renaissanceSeasons}</span>` : '',
-    ].filter(Boolean).join('');
-
+    const hitPct = p.totalWeeks > 0 ? Math.round(p.totalWeeksHit / p.totalWeeks * 100) : 0;
     return `<div class="atp-card">
       <div class="atp-name">${p.name}</div>
-      <div class="atp-bees">${bees || '&nbsp;'}</div>
+      <hr class="atp-divider">
       <div class="atp-stats-row">
         <div class="atp-stat-cell"><div class="atp-sv">${p.seasons}</div><div class="atp-sl">Seasons</div></div>
         <div class="atp-stat-cell"><div class="atp-sv">${p.totalWorkouts}</div><div class="atp-sl">Workouts</div></div>
         <div class="atp-stat-cell"><div class="atp-sv ${p.totalMisses === 0 ? 'atp-zero' : ''}">${p.totalMisses}</div><div class="atp-sl">Misses</div></div>
+        <div class="atp-stat-cell"><div class="atp-sv">${hitPct}%</div><div class="atp-sl">Hit Rate</div></div>
       </div>
-      ${badges ? `<div class="atp-badges">${badges}</div>` : ''}
+      ${bees ? `<div class="atp-bees">${bees}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -726,15 +725,12 @@ function init() {
   renderAwards();
 }
 
-function toggleFooter() {
+document.getElementById('footer-toggle').addEventListener('click', function() {
     const body = document.getElementById('footer-body');
-    const btn = document.getElementById('footer-toggle');
     const open = body.style.display !== 'none';
     body.style.display = open ? 'none' : 'block';
-    btn.textContent = (open
-      ? 'About GoalSZN + this site ▾'
-      : 'About GoalSZN + this site ▴');
-  }
+    this.textContent = open ? 'About GoalSZN + this site ▾' : 'About GoalSZN + this site ▴';
+  });
 
   document.getElementById('season-select').addEventListener('change', function() {
     CURRENT_SEASON = this.value;
@@ -742,6 +738,16 @@ function toggleFooter() {
     document.getElementById('season-select').classList.remove('dimmed');
     init();
   });
+  function exitAlltime() {
+    if (CURRENT_SEASON === 'alltime') {
+      CURRENT_SEASON = document.getElementById('season-select').value;
+      document.getElementById('alltime-btn').classList.remove('active');
+      document.getElementById('season-select').classList.remove('dimmed');
+      init();
+    }
+  }
+  document.getElementById('season-select').addEventListener('mousedown', exitAlltime);
+  document.getElementById('season-select').addEventListener('touchstart', exitAlltime);
   document.getElementById('alltime-btn').addEventListener('click', function() {
     CURRENT_SEASON = 'alltime';
     this.classList.add('active');
