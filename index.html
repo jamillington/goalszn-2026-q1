@@ -115,14 +115,14 @@ table.grid td.col-summary:first-of-type {
 .alltime-btn:hover:not(.active) { background: var(--lime-light); color: var(--dark); border-color: var(--lime-dim); }
 
 .summary-bar {
-  display: flex; gap: 16px; flex-wrap: wrap;
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;
   margin: 20px 0;
   padding: 16px;
   background: var(--surface);
   border-radius: 12px;
   border: 1px solid var(--border);
 }
-.summary-stat { flex: 1; min-width: 140px; }
+.summary-stat { flex: 1; min-width: 120px; display: flex; flex-direction: column; }
 .summary-stat .label { font-size: 12px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
 .summary-stat .value { font-size: 24px; font-weight: 800; margin-top: 4px; color: var(--dark); }
 .summary-stat.pot .value { color: var(--dark); }
@@ -193,8 +193,8 @@ table.grid td.totals.zero { background: var(--lime-light); color: var(--dark); }
 .wd-partial { background: var(--partial-bg); }
 .wd-miss { background: var(--miss-bg); }
 .wd-none { background: var(--none-bg); }
-.card .stats { display: flex; border-top: 1px solid var(--border); padding-top: 12px; gap: 0; }
-.card .stat { text-align: center; flex: 1; }
+.card .stats { display: flex; border-top: 1px solid var(--border); padding-top: 12px; gap: 0; align-items: flex-start; }
+.card .stat { text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; }
 .card .stat .v { font-size: 20px; font-weight: 800; color: var(--dark); font-variant-numeric: tabular-nums; }
 .card .miss .v { color: #991b1b; }
 .card .miss.zero .v { color: #16a34a; }
@@ -371,9 +371,10 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border
   .header-top { flex-wrap: wrap; }
   .season-nav { flex-wrap: wrap; }
 
-  .summary-bar { gap: 8px; padding: 10px; }
-  .summary-stat { min-width: 80px; }
-  .summary-stat .value { font-size: 18px; }
+  .summary-bar { gap: 10px; padding: 10px; }
+  .summary-stat { min-width: 0; flex: 0 0 calc(50% - 5px); }
+  .summary-stat .value { font-size: 20px; }
+  .summary-stat .label { font-size: 10px; }
 
   .section-header { font-size: 13px; margin: 18px 0 8px; }
 
@@ -488,6 +489,7 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border
       1/wk=$30 · 2/wk=$15 · 3/wk=$10 · 4/wk=$8 · 5/wk=$6 · 6/wk=$4 · 7/wk=$2.
       Two-a-days counted only for committers of 5+/wk.
       <a href="https://docs.google.com/document/d/14k1aa2kv8HRd7lrS9b8OQNlKDnGiBv-4qrWLTurBz2A/edit?usp=drive_link" target="_blank" style="color:var(--text-muted)">Full rules here →</a>
+      <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px">A branch of <a href="https://goal-szn.vercel.app/" target="_blank" style="color:var(--text-muted)">GoalSZN</a>&#8482;</div>
     </div>
   </footer>
 </div>
