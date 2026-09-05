@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GoalSZN — Dues Tracker</title>
+<title>GoalSZN — Lactic Acid Trip Gym</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap');
 
@@ -49,37 +49,70 @@ header {
   padding-bottom: 20px;
   border-bottom: 2px solid var(--lime);
 }
-h1 {
-  margin: 0 0 4px 0;
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--dark);
+.header-top { display: flex; align-items: baseline; gap: 10px; }
+.header-brand {
+  font-size: 32px; font-weight: 800; letter-spacing: -1px; color: var(--dark); line-height: 1;
 }
-h1 span { color: var(--lime); }
-.subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.header-brand span { color: var(--lime); }
+.header-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text-faint); margin-top: 2px;
+}
+.season-lede { display: flex; flex-direction: column; gap: 2px; }
+.season-lede-name {
+  font-size: 22px; font-weight: 800; color: var(--dark); letter-spacing: -0.4px; line-height: 1.1;
+}
+.season-lede-meta { font-size: 12px; color: var(--text-muted); }
 
-.season-picker {
-  display: inline-flex;
-  background: var(--surface);
-  border-radius: 999px;
-  padding: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  border: 1px solid var(--border);
-}
-.season-btn {
+.season-nav { display: flex; align-items: center; gap: 8px; }
+.season-select-wrap { position: relative; }
+.season-select {
+  appearance: none; -webkit-appearance: none;
+  background: var(--dark);
+  color: var(--lime);
   border: none;
-  background: transparent;
-  padding: 6px 16px;
   border-radius: 999px;
+  padding: 7px 36px 7px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
   cursor: pointer;
+  letter-spacing: -0.1px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236EE56A' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+.season-select option { background: #1a2b1a; color: #fff; font-weight: 600; }
+.season-select:focus { outline: 2px solid var(--lime); outline-offset: 2px; }
+.season-select.dimmed { background-color: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+/* Summary columns (Misses + Owed) — visually separated from the weekly grid */
+table.grid th.col-summary {
+  color: var(--dark);
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  background: #e8f0e8;
+  border-radius: 6px;
+  box-shadow: -6px 0 0 0 var(--bg);
+}
+table.grid th.col-summary:first-of-type,
+table.grid td.col-summary:first-of-type {
+  box-shadow: -6px 0 0 0 var(--bg), inset 3px 0 0 0 var(--dark-mid);
+}
+.alltime-btn {
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 16px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-muted);
   font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.season-btn.active { background: var(--dark); color: var(--lime); }
-.season-btn:hover:not(.active) { background: var(--lime-light); color: var(--dark); }
+.alltime-btn.active { background: var(--dark); color: var(--lime); border-color: var(--dark); }
+.alltime-btn:hover:not(.active) { background: var(--lime-light); color: var(--dark); border-color: var(--lime-dim); }
 
 .summary-bar {
   display: flex; gap: 16px; flex-wrap: wrap;
@@ -140,24 +173,32 @@ table.grid td.totals { font-weight: 700; background: #fecaca; color: #991b1b; }
 table.grid td.totals.zero { background: var(--lime-light); color: var(--dark); }
 
 /* Person cards */
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 12px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 12px; }
 .card {
   background: var(--surface);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px;
   border: 1px solid var(--border);
   cursor: pointer;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.card:hover { transform: translateY(-2px); border-color: var(--lime); box-shadow: 0 4px 16px rgba(110,229,106,0.15); }
-.card .name { font-weight: 700; font-size: 16px; margin-bottom: 8px; color: var(--dark); }
-.card .goal-row { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
-.card .stats { display: flex; justify-content: space-between; }
+.card:hover { transform: translateY(-2px); border-color: var(--lime); box-shadow: 0 4px 16px rgba(110,229,106,0.18); }
+.card .card-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+.card .name { font-weight: 800; font-size: 15px; color: var(--dark); }
+.card .goal-chip { font-size: 11px; font-weight: 600; color: var(--text-faint); background: var(--bg); border-radius: 999px; padding: 2px 8px; border: 1px solid var(--border); white-space: nowrap; }
+.week-dots { display: flex; gap: 3px; margin-bottom: 14px; }
+.wd { flex: 1; height: 7px; border-radius: 3px; }
+.wd-hit { background: var(--hit-bg); }
+.wd-over { background: var(--over-bg); }
+.wd-partial { background: var(--partial-bg); }
+.wd-miss { background: var(--miss-bg); }
+.wd-none { background: var(--none-bg); }
+.card .stats { display: flex; border-top: 1px solid var(--border); padding-top: 12px; gap: 0; }
 .card .stat { text-align: center; flex: 1; }
-.card .stat .v { font-size: 22px; font-weight: 800; color: var(--dark); }
+.card .stat .v { font-size: 20px; font-weight: 800; color: var(--dark); font-variant-numeric: tabular-nums; }
 .card .miss .v { color: #991b1b; }
 .card .miss.zero .v { color: #16a34a; }
-.card .stat .l { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; }
+.card .stat .l { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; }
 .card .owed .v { color: #991b1b; }
 .card .owed.zero .v { color: #16a34a; }
 .card .miss-pill {
@@ -203,6 +244,12 @@ table.grid td.totals.zero { background: var(--lime-light); color: var(--dark); }
 .modal table th { text-align: left; padding: 8px; border-bottom: 2px solid var(--lime); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
 .modal table td { padding: 8px; border-bottom: 1px solid var(--border); }
 .modal table tr:last-child td { border-bottom: none; }
+.week-detail { display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; border-radius: 8px; margin-bottom: 4px; font-size: 13px; gap: 12px; }
+.week-detail.hit { background: var(--hit-bg); }
+.week-detail.miss { background: var(--miss-bg); color: #991b1b; }
+.week-detail.miss strong { color: #991b1b; }
+.event { font-size: 12px; background: var(--bg); border-left: 3px solid var(--lime); border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; }
+.event.tz { border-left-color: var(--amber); }
 
 /* Flags section */
 .flags-list { background: var(--surface); border-radius: 12px; padding: 16px; border: 1px solid var(--border); }
@@ -220,7 +267,45 @@ table.grid td.totals.zero { background: var(--lime-light); color: var(--dark); }
 .adj-row .note { color: var(--text); }
 .adj-row .amount { font-weight: 700; color: var(--dark); font-variant-numeric: tabular-nums; }
 
-footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-faint); }
+.alltime-people {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+.atp-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.atp-name {
+  font-size: 14px; font-weight: 800; color: var(--dark); margin-bottom: 6px;
+}
+.atp-bees {
+  min-height: 22px; display: flex; flex-wrap: wrap; gap: 4px;
+  align-items: center; margin-bottom: 10px;
+}
+.atp-stats-row {
+  display: flex; gap: 0; border-top: 1px solid var(--border); padding-top: 10px;
+}
+.atp-stat-cell { flex: 1; text-align: center; }
+.atp-sv { font-size: 20px; font-weight: 800; color: var(--dark); font-variant-numeric: tabular-nums; }
+.atp-sv.atp-zero { color: #16a34a; }
+.atp-sl { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; }
+.atp-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.atp-badge {
+  font-size: 11px; padding: 2px 8px; border-radius: 999px;
+  background: var(--none-bg); color: var(--text-muted); border: 1px solid var(--border);
+}
+footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); }
+.footer-toggle {
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; color: var(--text-faint); font-family: inherit;
+  padding: 0; letter-spacing: 0.2px;
+}
+.footer-toggle:hover { color: var(--text-muted); }
+.footer-body { font-size: 12px; color: var(--text-faint); margin-top: 8px; line-height: 1.6; }
 
 /* All-time banner */
 .alltime-banner {
@@ -276,33 +361,92 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border
 .award-card .award-detail {
   font-size: 11px; color: var(--text-faint); margin-top: 3px;
 }
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .container { padding: 12px; }
+  h1 { font-size: 20px; }
+  .season-lede-meta { font-size: 11px; }
+  .header-top { flex-wrap: wrap; }
+  .season-nav { flex-wrap: wrap; }
+
+  .summary-bar { gap: 8px; padding: 10px; }
+  .summary-stat { min-width: 80px; }
+  .summary-stat .value { font-size: 18px; }
+
+  .section-header { font-size: 13px; margin: 18px 0 8px; }
+
+  .cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .card { padding: 12px; }
+  .card .name { font-size: 13px; }
+  .season-lede-name { font-size: 18px; }
+  .card .stat .v { font-size: 18px; }
+
+  .grid-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.grid { min-width: 500px; }
+  table.grid th, table.grid td { padding: 4px 2px; font-size: 11px; }
+  table.grid th.person-col, table.grid td.person-col { min-width: 100px; font-size: 11px; padding-right: 6px; }
+
+  .awards-strip { gap: 8px; }
+  .award-card { min-width: 130px; padding: 12px; }
+  .award-card .award-emoji { font-size: 22px; }
+  .award-card .award-winner { font-size: 13px; }
+
+  .flag-row { grid-template-columns: 1fr; gap: 4px; }
+  .flag-row .who { font-size: 12px; }
+
+  .modal { padding: 16px; border-radius: 12px; }
+
+  #alltime-hero-total { font-size: 40px !important; }
+  .alltime-people { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .atp-card-title { font-size: 14px; }
+  .atp-name { font-size: 13px; }
+  .atp-mini .av { font-size: 15px; }
+
+  .legend { gap: 8px; font-size: 11px; }
+}
+@media (max-width: 400px) {
+  .cards { grid-template-columns: 1fr; }
+  .alltime-people { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
-      <h1 id="page-title"><span>GOAL</span>SZN — Dues Tracker</h1>
-      <div class="season-picker">
-        <button class="season-btn" data-season="alltime">All-Time</button>
-        <button class="season-btn" data-season="fall2024">Fall 2024</button>
-        <button class="season-btn" data-season="spring2025">Spring 2025</button>
-        <button class="season-btn" data-season="summer2025">Summer 2025</button>
-        <button class="season-btn" data-season="fall2025">Fall 2025</button>
-        <button class="season-btn" data-season="q1">Q1 2026</button>
-        <button class="season-btn" data-season="q2">Q2 2026</button>
-        <button class="season-btn active" data-season="summer">Summer 2026</button>
-      </div>
+    <div class="header-top">
+      <div class="header-brand"><span>GOAL</span>SZN</div>
+      <div class="header-label">dues tracker</div>
     </div>
-    <div class="subtitle" id="page-subtitle">Season info loads here.</div>
+    <div class="season-nav" style="margin:14px 0 16px">
+      <div class="season-select-wrap">
+        <select id="season-select" class="season-select">
+          <option value="summer">Summer 2026</option>
+          <option value="q2">Q2 2026</option>
+          <option value="q1">Q1 2026</option>
+          <option value="fall2025">Fall 2025</option>
+          <option value="summer2025">Summer 2025</option>
+          <option value="spring2025">Spring 2025</option>
+          <option value="fall2024">Fall 2024</option>
+        </select>
+      </div>
+      <button class="alltime-btn" id="alltime-btn">All-Time</button>
+    </div>
+    <div class="season-lede" id="season-lede"></div>
   </header>
 
   <div id="alltime-view" style="display:none">
-    <div style="text-align:center;padding:36px 0 28px">
-      <div style="font-size:56px;font-weight:800;color:var(--dark);letter-spacing:-2px;line-height:1">$1,783</div>
-      <div style="color:var(--text-muted);font-size:14px;margin-top:8px;letter-spacing:0.2px">collected across 7 seasons · running since Q4 2024</div>
-    </div>
+    <div style="text-align:center;padding:36px 0 28px"><div id="alltime-hero-total" style="font-size:56px;font-weight:800;color:var(--dark);letter-spacing:-2px;line-height:1">$0</div><div id="alltime-hero-sub" style="color:var(--text-muted);font-size:14px;margin-top:8px;letter-spacing:0.2px"></div></div>
     <div id="alltime-table" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;max-width:640px;margin:0 auto 40px"></div>
+    <div style="display:flex;align-items:baseline;gap:16px;margin:32px 0 10px;flex-wrap:wrap">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-faint)">Career Records</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--text-faint)"><span style="position:relative;display:inline-block;line-height:1.2;font-size:13px;vertical-align:middle">🐝<span style="position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:9px;line-height:1">👑</span></span> &nbsp;flawless season</span>
+        <span style="font-size:11px;color:var(--text-faint)">💪 overachiever</span>
+        <span style="font-size:11px;color:var(--text-faint)">🤸 renaissance athlete</span>
+      </div>
+    </div>
+    <div class="alltime-people" id="alltime-people"></div>
   </div>
 
   <div id="season-content">
@@ -320,6 +464,7 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border
   <div class="cards" id="cards"></div>
 
   <div class="section-header">Weekly grid</div>
+  <div class="grid-wrap">
   <div class="legend">
     <div class="legend-item"><div class="legend-box cell-hit"></div>Hit goal</div>
     <div class="legend-item"><div class="legend-box cell-over"></div>Over goal (no banking)</div>
@@ -329,6 +474,7 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border
   </div>
   <div style="overflow-x: auto;">
     <table class="grid" id="grid"></table>
+  </div><!-- end grid-wrap -->
   </div>
 
   <div class="section-header">⚠️ Flagged for review</div>
@@ -336,8 +482,13 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border
   </div><!-- end season-content -->
 
   <footer>
-    Built from the WhatsApp chat export + sign-up survey. Penalty per miss follows the rules table:
-    1/wk=$30, 2/wk=$15, 3/wk=$10, 4/wk=$8, 5/wk=$6, 6/wk=$4, 7/wk=$2. Two-a-days counted only for committers of 5+/wk.
+    <button class="footer-toggle" id="footer-toggle" onclick="toggleFooter()">About GoalSZN + this site ▾</button>
+    <div class="footer-body" id="footer-body" style="display:none">
+      Built from the group's WhatsApp chat export + sign-up surveys. Penalty per miss follows the rules table:
+      1/wk=$30 · 2/wk=$15 · 3/wk=$10 · 4/wk=$8 · 5/wk=$6 · 6/wk=$4 · 7/wk=$2.
+      Two-a-days counted only for committers of 5+/wk.
+      <a href="https://docs.google.com/document/d/14k1aa2kv8HRd7lrS9b8OQNlKDnGiBv-4qrWLTurBz2A/edit?usp=drive_link" target="_blank" style="color:var(--text-muted)">Full rules here →</a>
+    </div>
   </footer>
 </div>
 
@@ -372,9 +523,133 @@ const ALLTIME_SEASONS = [
   { label: 'Summer 2026', key: 'summer' },
 ];
 
+function renderAlltimePeople() {
+  const el = document.getElementById('alltime-people');
+  if (!el) return;
+
+  const NAME_NORM = {
+    "Aaron A.": "Aaron Apple",
+    "Aaron E.": "Aaron Engel-Hall",
+    "Brion": "Brion Spensieri",
+    "Eliza": "Eliza Fornero",
+    "Heather": "Heather Heistand",
+    "Jamila": "Jamila Janakiram",
+    "Leighton": "Leighton Wallace",
+    "Madeline": "Madeline Roe",
+    "Matt": "Matt Fornero",
+    "Nundu": "Nundu Janakiram",
+    "Prashant": "Prashant Mantha",
+    "Rebecca": "Rebecca Fisher",
+    "Talia": "Talia Engel Hall",
+  };
+
+  const SEASON_ORDER = ["fall2024","spring2025","summer2025","fall2025","q1","q2","summer"];
+
+  const RENAISSANCE_TYPES = [
+    { name: 'run', re: /\brun(ning)?\b|\bjog(ging)?\b/i },
+    { name: 'bike', re: /\bbik(e|ing)\b|\bcycl(e|ing)\b|\bspin(ning)?\b|\bpeloton\b/i },
+    { name: 'yoga', re: /\byoga\b|\bvinyasa\b|\byin\b/i },
+    { name: 'swim', re: /\bswim(ming)?\b|\bpool\b/i },
+    { name: 'pilates', re: /\bpilates\b/i },
+    { name: 'hike', re: /\bhik(e|ing)\b|\btrail\b/i },
+    { name: 'weights', re: /\bweights?\b|\blifting?\b|\bstrength\b|\bbench\b|\bsquat\b|\bdeadlift\b/i },
+    { name: 'gym', re: /\bgym\b/i },
+    { name: 'walk', re: /\bwalk(ing)?\b/i },
+    { name: 'tennis', re: /\btennis\b|\bpickleball\b/i },
+    { name: 'dance', re: /\bdanc(e|ing)\b/i },
+    { name: 'hiit', re: /\bhiit\b|\binterval\b/i },
+    { name: 'barre', re: /\bbarre\b/i },
+    { name: 'climb', re: /\bclimb(ing)?\b|\bbouldering\b/i },
+  ];
+
+  // Build canonical person map and compute per-season badges
+  const personMap = {};
+
+  SEASON_ORDER.forEach(key => {
+    if (!SEASONS[key]) return;
+    const seasonPeople = SEASONS[key].people;
+
+    // Overachiever: most bonus workouts above goal this season
+    let maxBonus = 0;
+    const bonuses = seasonPeople.map(p => {
+      const bonus = p.weeks.reduce((s, w) => s + Math.max(0, w.actual - p.goal), 0);
+      if (bonus > maxBonus) maxBonus = bonus;
+      return { name: NAME_NORM[p.name] || p.name, bonus };
+    });
+    const overachievers = maxBonus > 0
+      ? new Set(bonuses.filter(x => x.bonus === maxBonus).map(x => x.name))
+      : new Set();
+
+    // Renaissance: most distinct workout types this season
+    const varieties = seasonPeople.map(p => {
+      if (!p.all_events || p.all_events.length === 0) return null;
+      const found = new Set();
+      p.all_events.forEach(e => {
+        RENAISSANCE_TYPES.forEach(t => { if (t.re.test(e.caption || '')) found.add(t.name); });
+      });
+      return found.size > 0 ? { name: NAME_NORM[p.name] || p.name, count: found.size } : null;
+    }).filter(Boolean);
+    let renaissanceWinner = null;
+    if (varieties.length > 0) {
+      renaissanceWinner = varieties.reduce((best, x) => x.count > best.count ? x : best, varieties[0]).name;
+    }
+
+    seasonPeople.forEach(p => {
+      const canonical = NAME_NORM[p.name] || p.name;
+      if (!personMap[canonical]) {
+        personMap[canonical] = { name: canonical, seasons: 0, totalWorkouts: 0, totalMisses: 0, flawlessSeasons: 0, overachieverSeasons: 0, renaissanceSeasons: 0 };
+      }
+      const e = personMap[canonical];
+      e.seasons++;
+      e.totalWorkouts += p.weeks.reduce((s, w) => s + w.actual, 0);
+      e.totalMisses += p.total_misses;
+      if (p.total_misses === 0) e.flawlessSeasons++;
+      if (overachievers.has(canonical)) e.overachieverSeasons++;
+      if (renaissanceWinner === canonical) e.renaissanceSeasons++;
+    });
+  });
+
+  const people = Object.values(personMap).sort((a, b) =>
+    b.seasons - a.seasons || a.name.localeCompare(b.name)
+  );
+
+  const queenBee = '<span style="position:relative;display:inline-block;line-height:1.2;font-size:15px">🐝<span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:10px;line-height:1">👑</span></span>';
+
+  el.innerHTML = people.map(p => {
+    const bees = p.flawlessSeasons > 0
+      ? Array(p.flawlessSeasons).fill(queenBee).join('')
+      : '';
+    const badges = [
+      p.overachieverSeasons > 0 ? `<span class="atp-badge">💪 ×${p.overachieverSeasons}</span>` : '',
+      p.renaissanceSeasons > 0 ? `<span class="atp-badge">🤸 ×${p.renaissanceSeasons}</span>` : '',
+    ].filter(Boolean).join('');
+
+    return `<div class="atp-card">
+      <div class="atp-name">${p.name}</div>
+      <div class="atp-bees">${bees || '&nbsp;'}</div>
+      <div class="atp-stats-row">
+        <div class="atp-stat-cell"><div class="atp-sv">${p.seasons}</div><div class="atp-sl">Seasons</div></div>
+        <div class="atp-stat-cell"><div class="atp-sv">${p.totalWorkouts}</div><div class="atp-sl">Workouts</div></div>
+        <div class="atp-stat-cell"><div class="atp-sv ${p.totalMisses === 0 ? 'atp-zero' : ''}">${p.totalMisses}</div><div class="atp-sl">Misses</div></div>
+      </div>
+      ${badges ? `<div class="atp-badges">${badges}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
 function renderAlltimeView() {
   const el = document.getElementById('alltime-table');
   if (!el) return;
+  // Compute dynamic totals
+  const liveSeasons = ALLTIME_SEASONS.filter(s => s.key && SEASONS[s.key]);
+  const livePot = liveSeasons.reduce((sum, s) => {
+    const d = SEASONS[s.key];
+    return sum + (d.total_pot ?? d.people.reduce((a, p) => a + p.total_owed, 0));
+  }, 0);
+  const historicPot = ALLTIME_SEASONS.filter(s => !s.key && s.pot).reduce((sum, s) => sum + s.pot, 0);
+  const allPot = livePot + historicPot;
+  document.getElementById('alltime-hero-total').textContent = '$' + allPot.toLocaleString();
+  document.getElementById('alltime-hero-sub').textContent = `collected across ${ALLTIME_SEASONS.length} seasons · running since Fall 2024`;
   const rows = ALLTIME_SEASONS.map(s => {
     let participants = s.participants !== undefined ? s.participants : '—';
     let workouts = s.workouts !== undefined ? s.workouts : '—';
@@ -409,13 +684,13 @@ function renderAlltimeView() {
 }
 
 function init() {
-  document.getElementById('page-title').innerHTML = '<span>GOAL</span>SZN — Dues Tracker';
-
   if (CURRENT_SEASON === 'alltime') {
+    const lede = document.getElementById('season-lede');
+    if (lede) lede.innerHTML = '<div class="season-lede-name">All-Time</div><div class="season-lede-meta">All 7 seasons combined</div>';
     document.getElementById('season-content').style.display = 'none';
     document.getElementById('alltime-view').style.display = '';
-    document.getElementById('page-subtitle').textContent = 'Every GoalSZN season, all-time.';
     renderAlltimeView();
+    renderAlltimePeople();
     return;
   }
 
@@ -425,12 +700,16 @@ function init() {
   DATA = SEASONS[CURRENT_SEASON];
   // Header
   const label = DATA.season.label || CURRENT_SEASON.toUpperCase();
-  document.getElementById('page-title').innerHTML = '<span>GOAL</span>SZN ' + label + ' — Dues Tracker';
   const s = new Date(DATA.season.start + 'T12:00:00');
   const e = new Date(DATA.season.end + 'T12:00:00');
-  const fmt = d => d.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
-  document.getElementById('page-subtitle').textContent =
-    `Season: ${fmt(s)} → ${fmt(e)} · ${DATA.weeks.length} weeks.`;
+  const fmtShort = d => d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  const fmtFull = d => d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  const lede = document.getElementById('season-lede');
+  if (lede) {
+    const seasonName = DATA.season.name ? `<span style="color:var(--text-muted);font-size:13px;font-weight:500;display:block;margin-top:3px">${DATA.season.name}</span>` : '';
+    lede.innerHTML = `<div class="season-lede-name">${label}</div>
+      <div class="season-lede-meta">${fmtShort(s)} – ${fmtFull(e)} · ${DATA.weeks.length} weeks</div>${seasonName}`;
+  }
   // Summary
   const totalWorkouts = DATA.people.reduce((s,p) => s + p.weeks.reduce((a,w) => a + w.actual, 0), 0);
   const totalMisses = DATA.people.reduce((s,p) => s + p.total_misses, 0);
@@ -447,37 +726,57 @@ function init() {
   renderAwards();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.season-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      CURRENT_SEASON = btn.dataset.season;
-      document.querySelectorAll('.season-btn').forEach(b => b.classList.toggle('active', b === btn));
-      init();
-    });
+function toggleFooter() {
+    const body = document.getElementById('footer-body');
+    const btn = document.getElementById('footer-toggle');
+    const open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    btn.textContent = (open
+      ? 'About GoalSZN + this site ▾'
+      : 'About GoalSZN + this site ▴');
+  }
+
+  document.getElementById('season-select').addEventListener('change', function() {
+    CURRENT_SEASON = this.value;
+    document.getElementById('alltime-btn').classList.remove('active');
+    document.getElementById('season-select').classList.remove('dimmed');
+    init();
   });
-});
+  document.getElementById('alltime-btn').addEventListener('click', function() {
+    CURRENT_SEASON = 'alltime';
+    this.classList.add('active');
+    document.getElementById('season-select').classList.add('dimmed');
+    init();
+  });
 
 function renderCards() {
   const root = document.getElementById('cards');
-  // Sort alphabetically by initials
   const sorted = [...DATA.people].sort((a,b) => a.name.localeCompare(b.name));
   root.innerHTML = sorted.map(p => {
-    const flagCount = 0; // flags shown in grid, not on cards
+    const totalWorkouts = p.weeks.reduce((s,w)=>s+w.actual,0);
     const owedClass = p.total_owed === 0 ? 'zero' : '';
     const missClass = p.total_misses === 0 ? 'zero' : '';
-    return `
-      <div class="card" onclick="openPerson('${p.name.replace(/'/g, "\'")}')">
-        <div class="name">${p.name}
-          ${flagCount > 0 ? `<span class="flag-pill">⚠️ ${flagCount} flag${flagCount>1?'s':''}</span>` : ''}
+    const dots = p.weeks.map((w,i) => {
+      let cls;
+      if (w.actual === 0 && w.missed > 0) cls = 'wd-miss';
+      else if (w.actual === 0) cls = 'wd-none';
+      else if (w.missed === 0 && w.actual >= p.goal) cls = w.actual > p.goal ? 'wd-over' : 'wd-hit';
+      else cls = 'wd-partial';
+      return `<span class="wd ${cls}" title="W${i+1}: ${w.actual} workouts"></span>`;
+    }).join('');
+    const safeName = p.name.replace(/'/g, "\\'");
+    return `<div class="card" onclick="openPerson('${safeName}')">
+        <div class="card-top">
+          <div class="name">${p.name}</div>
+          <div class="goal-chip">${p.goal}/wk</div>
         </div>
-        <div class="goal-row">Goal: ${p.goal}/wk · Penalty $${p.penalty}/miss${p.two_a_day_ok ? ' · 2-a-days OK' : ''}</div>
+        <div class="week-dots">${dots}</div>
         <div class="stats">
-          <div class="stat"><div class="v">${p.weeks.reduce((s,w)=>s+w.actual,0)}</div><div class="l">Posted</div></div>
-          <div class="stat miss ${missClass}"><div class="v">${p.total_misses}</div><div class="l">Missed</div></div>
+          <div class="stat"><div class="v">${totalWorkouts}</div><div class="l">Workouts</div></div>
+          <div class="stat miss ${missClass}"><div class="v">${p.total_misses}</div><div class="l">Misses</div></div>
           <div class="stat owed ${owedClass}"><div class="v">$${p.total_owed}</div><div class="l">Owed</div></div>
         </div>
-      </div>
-    `;
+      </div>`;
   }).join('');
 }
 
@@ -489,7 +788,7 @@ function renderGrid() {
   weeks.forEach((w, i) => {
     html += `<th>W${i+1}<br><span style="font-weight:400">${fmtDate(w.start)}</span></th>`;
   });
-  html += '<th>Misses</th><th>Owed</th></tr></thead><tbody>';
+  html += '<th class="col-summary">Misses</th><th class="col-summary">Owed</th></tr></thead><tbody>';
   people.forEach(p => {
     html += `<tr><td class="person-col">${p.name} <span style="color:#888;font-weight:400">${p.goal}/wk</span></td>`;
     p.weeks.forEach(w => {
@@ -503,8 +802,8 @@ function renderGrid() {
       const flagIcon = w.flags > 0 ? '<span style="font-size:9px;margin-left:2px;opacity:0.85">⚠️</span>' : '';
       html += `<td class="${cls}" title="${w.actual}/${p.goal} · missed ${w.missed}${w.flags?' · flagged':''}${hasSickDay?' · sick day':''}">${w.actual}${sickIcon}${flagIcon}</td>`;
     });
-    html += `<td class="totals ${p.total_misses === 0 ? 'zero':''}">${p.total_misses}</td>`;
-    html += `<td class="totals ${p.total_owed === 0 ? 'zero':''}">$${p.total_owed}</td>`;
+    html += `<td class="totals col-summary ${p.total_misses === 0 ? 'zero':''}">${p.total_misses}</td>`;
+    html += `<td class="totals col-summary ${p.total_owed === 0 ? 'zero':''}">$${p.total_owed}</td>`;
     html += '</tr>';
   });
   html += '</tbody>';
@@ -619,21 +918,40 @@ function fireConfetti() {
   document.body.appendChild(canvas);
   const ctx = canvas.getContext('2d');
   const cols = ['#6EE56A','#1a2b1a','#d4f9d3','#b2f0b0','#ffffff','#d97706','#6EE56A'];
-  const ps = Array.from({length:100}, () => ({
+  const ps = Array.from({length:80}, () => ({
+    emoji: false,
     x: Math.random() * canvas.width,
     y: -10 - Math.random() * 200,
     c: cols[Math.floor(Math.random() * cols.length)],
     vx: (Math.random()-0.5)*8, vy: 2+Math.random()*6,
     a: Math.random()*Math.PI*2, av: (Math.random()-0.5)*0.4,
     w: 5+Math.random()*9, h: 7+Math.random()*12,
-  }));
+  })).concat(Array.from({length:20}, () => ({
+    emoji: true,
+    x: Math.random() * canvas.width,
+    y: -10 - Math.random() * 250,
+    vx: (Math.random()-0.5)*5, vy: 1.5+Math.random()*4,
+    a: 0, av: (Math.random()-0.5)*0.08,
+    size: 20+Math.random()*18,
+  })));
   let f = 0;
   (function tick() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
+    const alpha = Math.max(0, 1 - f/130);
     ps.forEach(p => {
-      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a);
-      ctx.fillStyle = p.c; ctx.globalAlpha = Math.max(0, 1 - f/130);
-      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.a);
+      if (p.emoji) {
+        ctx.font = p.size + 'px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💪', 0, 0);
+      } else {
+        ctx.fillStyle = p.c;
+        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      }
       ctx.restore();
       p.x+=p.vx; p.y+=p.vy; p.a+=p.av; p.vy+=0.18;
     });
@@ -749,7 +1067,7 @@ function openPerson(name) {
   html += '<h3 style="font-size:14px;margin:16px 0 8px 0">Week-by-week</h3>';
   p.weeks.forEach((w, i) => {
     const cls = w.missed > 0 ? 'miss' : 'hit';
-    html += `<div class="week-detail ${cls}"><span><strong>W${i+1}</strong> · ${fmtDate(w.week_start)} – ${fmtDate(w.week_end)}</span><span>${w.actual}/${p.goal} workouts${w.missed > 0 ? ` · missed ${w.missed} · –$${w.missed * p.penalty}` : ' ✓'}${w.flags > 0 ? ` · ⚠️ ${w.flags} flag${w.flags>1?'s':''}` : ''}</span></div>`;
+    html += `<div class="week-detail ${cls}"><span><strong>W${i+1}</strong> &nbsp; ${fmtDate(w.week_start)} – ${fmtDate(w.week_end)}</span><span>${w.actual}/${p.goal} workouts${w.missed > 0 ? '' : ' ✓'}${w.flags > 0 ? ` · ⚠️ ${w.flags} flag${w.flags>1?'s':''}` : ''}</span></div>`;
   });
 
   if (p.adjustments && p.adjustments.length > 0) {
