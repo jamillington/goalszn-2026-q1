@@ -269,7 +269,7 @@ table.grid td.totals.zero { background: var(--lime-light); color: var(--dark); }
 
 .alltime-people {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 12px;
   margin-top: 8px;
 }
@@ -439,7 +439,7 @@ footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border
 
   <div id="alltime-view" style="display:none">
     <div style="text-align:center;padding:36px 0 28px"><div id="alltime-hero-total" style="font-size:56px;font-weight:800;color:var(--dark);letter-spacing:-2px;line-height:1">$0</div><div id="alltime-hero-sub" style="color:var(--text-muted);font-size:14px;margin-top:8px;letter-spacing:0.2px"></div></div>
-    <div id="alltime-table" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;max-width:640px;margin:0 auto 40px"></div>
+    <div style="overflow-x:auto;max-width:640px;margin:0 auto 40px;border-radius:12px;border:1px solid var(--border)"><div id="alltime-table" style="background:var(--surface);border-radius:12px;overflow:hidden;min-width:340px"></div></div>
     <div style="display:flex;align-items:baseline;gap:16px;margin:32px 0 10px;flex-wrap:wrap">
       <div style="font-size:16px;font-weight:800;letter-spacing:-0.3px;color:var(--dark)">Career Records</div>
       <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
@@ -614,7 +614,7 @@ function renderAlltimePeople() {
   });
 
   const people = Object.values(personMap).sort((a, b) =>
-    b.seasons - a.seasons || a.name.localeCompare(b.name)
+    b.totalWorkouts - a.totalWorkouts || a.name.localeCompare(b.name)
   );
 
   const queenBee = '<span style="position:relative;display:inline-block;line-height:1.2;font-size:15px">🐝<span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:10px;line-height:1">👑</span></span>';
@@ -625,10 +625,9 @@ function renderAlltimePeople() {
       : '';
     const hitPct = p.totalWeeks > 0 ? Math.round(p.totalWeeksHit / p.totalWeeks * 100) : 0;
     return `<div class="atp-card">
-      <div class="atp-name">${p.name}</div>
+      <div class="atp-name">${p.name} <span style="font-size:11px;font-weight:400;color:var(--text-faint)">${p.seasons} season${p.seasons !== 1 ? 's' : ''}</span></div>
       <hr class="atp-divider">
       <div class="atp-stats-row">
-        <div class="atp-stat-cell"><div class="atp-sv">${p.seasons}</div><div class="atp-sl">Seasons</div></div>
         <div class="atp-stat-cell"><div class="atp-sv">${p.totalWorkouts}</div><div class="atp-sl">Workouts</div></div>
         <div class="atp-stat-cell"><div class="atp-sv ${p.totalMisses === 0 ? 'atp-zero' : ''}">${p.totalMisses}</div><div class="atp-sl">Misses</div></div>
         <div class="atp-stat-cell"><div class="atp-sv">${hitPct}%</div><div class="atp-sl">Hit Rate</div></div>
