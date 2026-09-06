@@ -529,21 +529,7 @@ function renderAlltimePeople() {
   const el = document.getElementById('alltime-people');
   if (!el) return;
 
-  const NAME_NORM = {
-    "Aaron A.": "Aaron Apple",
-    "Aaron E.": "Aaron Engel-Hall",
-    "Brion": "Brion Spensieri",
-    "Eliza": "Eliza Fornero",
-    "Heather": "Heather Heistand",
-    "Jamila": "Jamila Janakiram",
-    "Leighton": "Leighton Wallace",
-    "Madeline": "Madeline Roe",
-    "Matt": "Matt Fornero",
-    "Nundu": "Nundu Janakiram",
-    "Prashant": "Prashant Mantha",
-    "Rebecca": "Rebecca Fisher",
-    "Talia": "Talia Engel Hall",
-  };
+  const NAME_NORM = DISPLAY_NAME;
 
   const SEASON_ORDER = ["fall2024","spring2025","summer2025","fall2025","q1","q2","summer"];
 
@@ -762,6 +748,37 @@ document.getElementById('footer-toggle').addEventListener('click', function() {
     init();
   });
 
+const DISPLAY_NAME = {
+  // short variants (recent seasons)
+  "Aaron A.":       "Aaron A",
+  "Aaron E.":       "Aaron EH",
+  "Brion":          "Brion",
+  "Eliza":          "Eliza",
+  "Heather":        "Heather",
+  "Jamila":         "Jamila",
+  "Leighton":       "Leighton",
+  "Madeline":       "Madeline",
+  "Matt":           "Matt",
+  "Nundu":          "Nundu",
+  "Prashant":       "Prashant",
+  "Rebecca":        "Rebecca",
+  "Talia":          "Talia",
+  // full-name variants (older seasons)
+  "Aaron Apple":    "Aaron A",
+  "Aaron Engel-Hall": "Aaron EH",
+  "Brion Spensieri": "Brion",
+  "Eliza Fornero":  "Eliza",
+  "Heather Heistand": "Heather",
+  "Jamila Janakiram": "Jamila",
+  "Leighton Wallace": "Leighton",
+  "Madeline Roe":   "Madeline",
+  "Matt Fornero":   "Matt",
+  "Nundu Janakiram": "Nundu",
+  "Prashant Mantha": "Prashant",
+  "Rebecca Fisher": "Rebecca",
+  "Talia Engel Hall": "Talia",
+};
+
 function renderCards() {
   const root = document.getElementById('cards');
   const sorted = [...DATA.people].sort((a,b) => a.name.localeCompare(b.name));
@@ -780,7 +797,7 @@ function renderCards() {
     const safeName = p.name.replace(/'/g, "\\'");
     return `<div class="card" onclick="openPerson('${safeName}')">
         <div class="card-top">
-          <div class="name">${p.name}</div>
+          <div class="name">${DISPLAY_NAME[p.name] || p.name}</div>
           <div class="goal-chip">${p.goal}/wk</div>
         </div>
         <div class="week-dots">${dots}</div>
@@ -803,7 +820,7 @@ function renderGrid() {
   });
   html += '<th class="col-summary">Misses</th><th class="col-summary">Owed</th></tr></thead><tbody>';
   people.forEach(p => {
-    html += `<tr><td class="person-col">${p.name} <span style="color:#888;font-weight:400">${p.goal}/wk</span></td>`;
+    html += `<tr><td class="person-col">${DISPLAY_NAME[p.name] || p.name} <span style="color:#888;font-weight:400">${p.goal}/wk</span></td>`;
     p.weeks.forEach(w => {
       let cls = 'cell ';
       if (w.actual === 0) cls += 'cell-none';
@@ -901,7 +918,7 @@ function renderFlags() {
           }).join('<br>')
         : '<span style="color:var(--text-faint)">—</span>';
     html += `<tr>
-      <td style="${tdStyle};font-weight:700">${f.person}</td>
+      <td style="${tdStyle};font-weight:700">${DISPLAY_NAME[f.person] || f.person}</td>
       <td style="${tdStyle}">${msgHtml}</td>
       <td style="${tdStyle};color:#1e3a8a">${adjHtml}</td>
     </tr>`;
@@ -912,7 +929,7 @@ function renderFlags() {
     const parts = [adj.note];
     if (adj.orig_date && adj.effective_date) parts.push(`<span style="color:var(--text-faint);font-size:11px">${fmtDate(adj.orig_date)} → ${fmtDate(adj.effective_date)}</span>`);
     html += `<tr>
-      <td style="${tdStyle};font-weight:700">${person}</td>
+      <td style="${tdStyle};font-weight:700">${DISPLAY_NAME[person] || person}</td>
       <td style="${tdStyle}"><span style="color:var(--text-faint)">—</span></td>
       <td style="${tdStyle};color:#1e3a8a">${parts.join('<br>')}</td>
     </tr>`;
@@ -984,7 +1001,7 @@ function renderAwards() {
     const sickDaysFromFlags = (p.flagged_events || []).filter(f => typeof f === 'string' && f.startsWith('🤒')).length;
     const sickDaysFromWeeks = p.weeks.some(w => typeof w.sick_days === 'number' && w.sick_days > 0);
     return p.total_misses === 0 && sickDaysFromFlags === 0 && !sickDaysFromWeeks;
-  }).map(p => p.name);
+  }).map(p => DISPLAY_NAME[p.name] || p.name);
   if (flawless.length > 0) {
     awards.push({ emojiHtml: '<span style="position:relative;display:inline-block;line-height:1">🐝<span style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:13px;line-height:1">👑</span></span>', emoji: '🐝', title: 'Flawless', winner: flawless.join(' · '), detail: 'no misses, no sick days' });
   }
@@ -992,7 +1009,7 @@ function renderAwards() {
   // Overachiever — most bonus workouts above weekly goal
   const overData = people.map(p => {
     const bonus = p.weeks.reduce((sum, w) => sum + Math.max(0, w.actual - p.goal), 0);
-    return { name: p.name, bonus };
+    return { name: DISPLAY_NAME[p.name] || p.name, bonus };
   }).filter(x => x.bonus > 0);
   if (overData.length > 0) {
     overData.sort((a,b) => b.bonus - a.bonus);
@@ -1007,7 +1024,7 @@ function renderAwards() {
     const weekendData = people.map(p => {
       if (!p.all_events || p.all_events.length === 0) return null;
       const count = p.all_events.filter(e => { const d = new Date(e.ts).getDay(); return d === 0 || d === 6; }).length;
-      return { name: p.name, count };
+      return { name: DISPLAY_NAME[p.name] || p.name, count };
     }).filter(Boolean).filter(x => x.count > 0);
     if (weekendData.length > 0) {
       weekendData.sort((a,b) => b.count - a.count);
@@ -1044,7 +1061,7 @@ function renderAwards() {
         const cap = (e.caption || '').toLowerCase();
         TYPES.forEach(t => { if (t.re.test(cap)) found.add(t.name); });
       });
-      return found.size > 0 ? { name: p.name, count: found.size, types: [...found] } : null;
+      return found.size > 0 ? { name: DISPLAY_NAME[p.name] || p.name, count: found.size, types: [...found] } : null;
     }).filter(Boolean);
 
     if (varieties.length > 0) {
@@ -1075,7 +1092,7 @@ function openPerson(name) {
   if (!p) return;
   if (p.total_misses === 0) fireConfetti();
   const body = document.getElementById('modal-body');
-  let html = `<h2>${p.name}</h2>`;
+  let html = `<h2>${DISPLAY_NAME[p.name] || p.name}</h2>`;
   html += `<div style="color:#666;margin-bottom:12px">Goal: ${p.goal}/wk · Penalty $${p.penalty}/miss · ${p.weeks.reduce((s,w)=>s+w.actual,0)} workouts logged · ${p.total_misses} missed · <strong style="color:#d97706">Owes $${p.total_owed}</strong></div>`;
   html += '<h3 style="font-size:14px;margin:16px 0 8px 0">Week-by-week</h3>';
   p.weeks.forEach((w, i) => {
